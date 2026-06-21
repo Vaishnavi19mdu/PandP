@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useStory, Persona, fantasyPersonas } from "../context/StoryContext";
 import { 
   Sparkles, Save, User as UserIcon, Shield, Anchor, Landmark, 
-  Map, Award, BookOpen, Clock, Heart 
+  Map, Award, BookOpen, Clock, Heart, ArrowLeft 
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
@@ -16,7 +16,14 @@ export const Profile: React.FC = () => {
   // Handle case where user is not logged in
   if (!currentUser) {
     return (
-      <div className="max-w-md mx-auto text-center p-8 bg-[#FAF5EC] border-2 border-[#D4AF37] rounded-3xl mt-12 shadow-xl">
+      <div className="max-w-md mx-auto text-center p-8 bg-[#FAF5EC] border-2 border-[#D4AF37] rounded-3xl mt-12 shadow-xl relative">
+        <button
+          onClick={() => setPage("Landing")}
+          className="absolute top-5 left-5 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-[#4A3428]/60 hover:text-[#4A3428] cursor-pointer transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back</span>
+        </button>
         <h2 className="font-medieval text-2xl font-black text-[#4A3428] mb-3">Traveler Verification Required</h2>
         <p className="text-xs font-serif italic text-soft-espresso/80 mb-6">
           "The cosmic registry does not recognize your current frequency."
@@ -89,6 +96,13 @@ export const Profile: React.FC = () => {
       </AnimatePresence>
 
       <div className="mb-8 space-y-2">
+        <button
+          onClick={() => setPage("Landing")}
+          className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-[#4A3428]/60 hover:text-[#4A3428] cursor-pointer transition-colors mb-2"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back</span>
+        </button>
         <span className="font-mono text-[9px] tracking-widest uppercase bg-[#D4AF37]/20 text-[#678DC6] border border-[#D4AF37]/30 px-3 py-1 rounded-full font-bold">
           Account Archives & Custom Ledger
         </span>

@@ -109,16 +109,19 @@ export const Landing: React.FC = () => {
       <MagicParticles />
       
       {/* 1. MOCHA HERO CHRONICLE UNIT - Rich Dark Mocha-to-Espresso Header for Immersive Fantasy Intro */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#2E1E16] via-[#3E2B21] to-[#281912] text-white pt-16 md:pt-28 pb-24 px-4 md:px-8 mt-0 border-b border-[#D4AF37]/20">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#2E1E16] via-[#3E2B21] to-[#281912] text-white pt-20 md:pt-32 pb-36 md:pb-44 px-4 md:px-8 mt-0">
         
         {/* Background visual light and coordinates overlay */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(230,192,106,0.15),transparent_50%)] pointer-events-none" />
         <div className="absolute -left-10 bottom-10 w-96 h-96 bg-amber-50/5 blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+        {/* Bottom bleed-out: fades the dark hero into the cream page background below so the transition feels intentional, not cut off */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 md:h-56 bg-gradient-to-b from-transparent via-[#3E2B21]/70 to-[#FCFAF6] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center relative z-10">
           
           {/* Hero text descriptor cluster */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+          <div className="lg:col-span-7 space-y-7 text-center lg:text-left">
             <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gold-glow/15 text-[#F0D597] text-xs font-semibold tracking-wider font-mono border border-[#D4AF37]/45 uppercase animate-bounce mt-4 lg:mt-0">
               <Sparkles className="w-3.5 h-3.5 animate-pulse text-gold-glow" />
               Every Story Opens a Door
@@ -554,7 +557,7 @@ export const Landing: React.FC = () => {
       </section>
 
       {/* 5. ENDINGS SHOWCASE (Shows visual variety and replayability outcomes) */}
-      <section className="mt-24 max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
+      <section className="mt-8 max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
         
         <div className="text-center space-y-2">
           <span className="inline-block text-[10px] uppercase font-mono tracking-widest text-[#678DC6] font-extrabold bg-[#678DC6]/10 px-3 py-1 rounded">

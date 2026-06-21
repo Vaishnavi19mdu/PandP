@@ -103,23 +103,25 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      {/* Drag-repositionable map compass widget of the Scriptorium */}
-      <motion.div
-        drag
-        dragMomentum={false}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-24 right-6 z-50 p-3.5 bg-gradient-to-r from-[#4E2B1F] to-[#1F120C] rounded-full shadow-[0_5px_15px_rgba(0,0,0,0.4)] border-2 border-[#D4AF37] cursor-pointer group flex items-center justify-center touch-none select-none"
-        onClick={() => setPage("MapExplorer")}
-      >
-        <div className="absolute inset-0 bg-gold-glow/25 blur-md rounded-full group-hover:scale-125 transition-transform duration-300 pointer-events-none" />
-        <Compass className="w-6 h-6 text-[#E6C06A] animate-spin-slow group-hover:text-white" />
-        
-        {/* Hover coordinate notification tooltip */}
-        <span className="absolute right-14 whitespace-nowrap bg-black/95 text-[#F4F1EC] border border-[#C5A880]/30 text-[9px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase font-mono tracking-wider shadow-lg">
-          ✦ Open Realm Map (Drag to Move)
-        </span>
-      </motion.div>
+      {/* Drag-repositionable map compass widget of the Scriptorium — hidden on the Map Explorer page itself, since you're already there */}
+      {currentPage !== "MapExplorer" && (
+        <motion.div
+          drag
+          dragMomentum={false}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="fixed bottom-24 right-6 z-50 p-3.5 bg-gradient-to-r from-[#4E2B1F] to-[#1F120C] rounded-full shadow-[0_5px_15px_rgba(0,0,0,0.4)] border-2 border-[#D4AF37] cursor-pointer group flex items-center justify-center touch-none select-none"
+          onClick={() => setPage("MapExplorer")}
+        >
+          <div className="absolute inset-0 bg-gold-glow/25 blur-md rounded-full group-hover:scale-125 transition-transform duration-300 pointer-events-none" />
+          <Compass className="w-6 h-6 text-[#E6C06A] animate-spin-slow group-hover:text-white" />
+          
+          {/* Hover coordinate notification tooltip */}
+          <span className="absolute right-14 whitespace-nowrap bg-black/95 text-[#F4F1EC] border border-[#C5A880]/30 text-[9px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase font-mono tracking-wider shadow-lg">
+            ✦ Open Realm Map (Drag to Move)
+          </span>
+        </motion.div>
+      )}
 
       {/* Persistent ancient library custom footer */}
       <Footer />

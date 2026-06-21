@@ -96,7 +96,9 @@ export const PortalMap: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full bg-[#4A3428]/95 overflow-hidden rounded-2xl border-2 border-gold-glow/50 p-6 shadow-2xl">
+    <div className="relative w-full bg-gradient-to-b from-[#4A3428] via-[#42301f] to-[#3a2a1c] overflow-visible rounded-2xl border-2 border-gold-glow/50 p-8 md:p-10 pb-16 md:pb-20 shadow-2xl">
+      {/* Bottom bleed: fades the brown card edge outward so it doesn't end on a hard line */}
+      <div className="absolute -bottom-8 left-4 right-4 h-16 bg-gradient-to-b from-[#3a2a1c]/60 to-transparent blur-xl pointer-events-none rounded-full" />
       <style>{`
         .scrollbar-none::-webkit-scrollbar {
           display: none;
@@ -120,7 +122,7 @@ export const PortalMap: React.FC = () => {
       </div>
 
       {/* Title */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gold-glow/20 pb-4 mb-6 gap-2 relative z-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gold-glow/20 pb-6 mb-8 gap-3 relative z-10">
         <div>
           <span className="font-medieval text-md tracking-wider text-gold-glow flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-gold-glow animate-pulse" />
@@ -132,7 +134,7 @@ export const PortalMap: React.FC = () => {
         </div>
         
         {/* Legends */}
-        <div className="flex items-center gap-4 text-[10px] font-mono text-[#F4F1EC]">
+        <div className="flex items-center gap-5 text-[10px] font-mono text-[#F4F1EC]">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-gold-glow animate-ping" />
             <span>Presence</span>
@@ -182,7 +184,7 @@ export const PortalMap: React.FC = () => {
           onMouseLeave={handleMouseLeave}
           onMouseUp={handleMouseUp}
           onMouseMove={handleMouseMove}
-          className={`relative min-h-[300px] bg-[#35251c] p-6 overflow-x-auto overflow-y-hidden scroll-smooth scrollbar-none select-none cursor-grab active:cursor-grabbing`}
+          className={`relative min-h-[340px] bg-[#35251c] p-8 overflow-x-auto overflow-y-hidden scroll-smooth scrollbar-none select-none cursor-grab active:cursor-grabbing`}
           style={{ overscrollBehaviorX: "contain" }}
         >
           {/* SVG Drawing Layer */}
@@ -260,7 +262,7 @@ export const PortalMap: React.FC = () => {
       </div>
       
       {/* Helpful Hint */}
-      <div className="mt-4 text-center text-[10px] text-white/50 italic font-sans">
+      <div className="mt-6 text-center text-[10px] text-white/50 italic font-sans">
         "Drag left or right to inspect alternate dimensions. Uncover alternate ending branches to achieve full completion."
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStory } from "../context/StoryContext";
-import { Mail, Lock, Sparkles, BookOpen } from "lucide-react";
+import { Mail, Lock, Sparkles, BookOpen, ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 
 export const Login: React.FC = () => {
@@ -41,7 +41,17 @@ export const Login: React.FC = () => {
       >
         {/* Magic gold line ornament */}
         <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#4E2B1F] via-[#E6C06A] to-[#678DC6]" />
-        
+
+        {/* Back Button */}
+        <button
+          type="button"
+          onClick={() => setPage("Landing")}
+          className="absolute top-5 left-5 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-[#4A3428]/60 hover:text-[#4A3428] cursor-pointer transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back</span>
+        </button>
+
         {/* Logo and Greeting */}
         <div className="text-center space-y-4 mb-8">
           <div className="inline-flex p-3.5 bg-[#4A3428] rounded-2xl border-2 border-[#D4AF37] shadow-lg animate-float">

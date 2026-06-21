@@ -30,12 +30,55 @@ export interface Persona {
   specialtyTrait: string;
 }
 
+export type AdventurerTitle = "Novice Traveler" | "Portal Wanderer" | "Lore Seeker" | "Rune Scholar" | "Chronicle Keeper" | "Dream Cartographer";
+
+export const adventurerTitles: AdventurerTitle[] = [
+  "Novice Traveler",
+  "Portal Wanderer",
+  "Lore Seeker",
+  "Rune Scholar",
+  "Chronicle Keeper",
+  "Dream Cartographer"
+];
+
+export interface Companion {
+  id: string;
+  name: string;
+  avatar: string;
+  type: string;
+}
+
+export const companionsList: Companion[] = [
+  { id: "luna", name: "Luna", avatar: "🦉", type: "Wise Spirit Griffin" },
+  { id: "ember", name: "Ember", avatar: "🦊", type: "Mischievous Fox" },
+  { id: "corvus", name: "Corvus", avatar: "🐦", type: "Sarcastic Raven" },
+  { id: "nimbus", name: "Nimbus", avatar: "🐱", type: "Curious Cat" },
+  { id: "ashwing", name: "Ashwing", avatar: "🐉", type: "Tiny Dragon" }
+];
+
+export type StarterTraitKey = "courage" | "knowledge" | "creativity" | "luck";
+
+export interface StarterTrait {
+  key: StarterTraitKey;
+  label: string;
+  emoji: string;
+}
+
+export const starterTraitsList: StarterTrait[] = [
+  { key: "courage", label: "Courage", emoji: "⚔️" },
+  { key: "knowledge", label: "Knowledge", emoji: "📖" },
+  { key: "creativity", label: "Creativity", emoji: "🎨" },
+  { key: "luck", label: "Luck", emoji: "🍀" }
+];
+
 export interface User {
   fullName: string;
   email: string;
   password?: string;
   persona: Persona;
-  title: "Novice Traveler" | "Keeper of Lost Pages" | "Master of Portals";
+  title: AdventurerTitle;
+  companion: Companion;
+  starterTrait: StarterTraitKey;
   createdAt: string;
 }
 
@@ -194,7 +237,15 @@ interface StoryContextType {
   currentUser: User | null;
   personasList: Persona[];
   loginUser: (email: string, passwordHash: string) => { success: boolean; error?: string };
-  signupUser: (fullName: string, email: string, passwordHash: string, persona: Persona) => { success: boolean; error?: string };
+  signupUser: (
+    fullName: string,
+    email: string,
+    passwordHash: string,
+    persona: Persona,
+    title: AdventurerTitle,
+    companion: Companion,
+    starterTrait: StarterTraitKey
+  ) => { success: boolean; error?: string };
   logoutUser: () => void;
   updateProfile: (fullName: string, persona: Persona) => void;
   // Lore and Daily Quests
@@ -567,7 +618,9 @@ export const StoryProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         email: "scholar@portals.com",
         password: "password123",
         persona: fantasyPersonas[0], // Sage Rowan
-        title: "Keeper of Lost Pages",
+        title: "Rune Scholar",
+        companion: companionsList[0],
+        starterTrait: "knowledge",
         createdAt: new Date().toISOString()
       },
       {
@@ -575,34 +628,15 @@ export const StoryProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         email: "master@portals.com",
         password: "password123",
         persona: fantasyPersonas[3], // Quinn Lorekeeper
-        title: "Master of Portals",
+        title: "Chronicle Keeper",
+        companion: companionsList[2],
+        starterTrait: "courage",
         createdAt: new Date().toISOString()
       }
     ];
     localStorage.setItem("pp_users_registry", JSON.stringify(initialUsers));
     return initialUsers;
   });
-
-  const getTitleForUser = (archiveCount: number): "Novice Traveler" | "Keeper of Lost Pages" | "Master of Portals" => {
-    if (archiveCount >= 3) return "Master of Portals";
-    if (archiveCount >= 1) return "Keeper of Lost Pages";
-    return "Novice Traveler";
-  };
-
-  // Sync current user title whenever archives shift
-  useEffect(() => {
-    if (currentUser) {
-      const computedTitle = getTitleForUser(archives.length);
-      if (currentUser.title !== computedTitle) {
-        const updated = { ...currentUser, title: computedTitle };
-        setCurrentUser(updated);
-        localStorage.setItem("pp_current_user", JSON.stringify(updated));
-        
-        // Also update in registry
-        setUsersRegistry(prev => prev.map(u => u.email === currentUser.email ? { ...u, title: computedTitle } : u));
-      }
-    }
-  }, [archives.length]);
 
   // Sync users registry to localStorage
   useEffect(() => {
@@ -622,7 +656,15 @@ export const StoryProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return { success: true };
   };
 
-  const signupUser = (fullName: string, email: string, passwordHash: string, persona: Persona) => {
+  const signupUser = (
+    fullName: string,
+    email: string,
+    passwordHash: string,
+    persona: Persona,
+    title: AdventurerTitle,
+    companion: Companion,
+    starterTrait: StarterTraitKey
+  ) => {
     const exists = usersRegistry.some(u => u.email.toLowerCase() === email.toLowerCase());
     if (exists) {
       return { success: false, error: "This coordinate identifier email matches an existing traveler." };
@@ -632,13 +674,19 @@ export const StoryProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       email,
       password: passwordHash,
       persona,
-      title: getTitleForUser(archives.length),
+      title,
+      companion,
+      starterTrait,
       createdAt: new Date().toISOString()
     };
     const updatedList = [...usersRegistry, newUser];
     setUsersRegistry(updatedList);
     setCurrentUser(newUser);
     localStorage.setItem("pp_current_user", JSON.stringify(newUser));
+
+    // Apply the +1 starter trait bonus immediately
+    setStatBoosts(b => ({ ...b, [starterTrait]: b[starterTrait] + 1 }));
+
     return { success: true };
   };
 

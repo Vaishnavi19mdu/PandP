@@ -18,6 +18,7 @@ interface LandmarkNode {
   kingdom: string;
   color: string;
   glowColor: string;
+  bgImage: string;
 }
 
 export const MapExplorer: React.FC = () => {
@@ -50,7 +51,8 @@ export const MapExplorer: React.FC = () => {
       lore: "A deep expanse of ancient woodland overflowing with raw temporal bark. It acts as the gateway sector for rookie portal seekers starting their path.",
       kingdom: "Sylvan Guild",
       color: "#2E7D32",
-      glowColor: "rgba(46,125,50,0.5)"
+      glowColor: "rgba(46,125,50,0.5)",
+      bgImage: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=900&q=70"
     },
     {
       id: "map-scriptorium",
@@ -62,7 +64,8 @@ export const MapExplorer: React.FC = () => {
       lore: "The central headquarters of the chronicle keepers. Inside this heavy stone fortress, ink writes history onto living paper maps in real-time.",
       kingdom: "Scriptorium Gentry",
       color: "#D4AF37",
-      glowColor: "rgba(212,175,55,0.5)"
+      glowColor: "rgba(212,175,55,0.5)",
+      bgImage: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=900&q=70"
     },
     {
       id: "map-chronos",
@@ -74,7 +77,8 @@ export const MapExplorer: React.FC = () => {
       lore: "A high-frequency rift where reality bends back on itself. Traveling here requires a stable Portal Anchor unless you want to get lost in old coordinates.",
       kingdom: "The Anomaly Abyss",
       color: "#7E57C2",
-      glowColor: "rgba(126,87,194,0.5)"
+      glowColor: "rgba(126,87,194,0.5)",
+      bgImage: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=900&q=70"
     },
     {
       id: "map-astral",
@@ -86,7 +90,8 @@ export const MapExplorer: React.FC = () => {
       lore: "A glittering sky tower crafted from pure star-glass. Its heavy lens projects coordinates straight on celestial winds for fast ether-stepping.",
       kingdom: "Evermist Empire",
       color: "#29B6F6",
-      glowColor: "rgba(41,182,246,0.5)"
+      glowColor: "rgba(41,182,246,0.5)",
+      bgImage: "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=900&q=70"
     },
     {
       id: "map-ember",
@@ -98,7 +103,8 @@ export const MapExplorer: React.FC = () => {
       lore: "A high-entropy zone designed to synthesize portal heat filters. Deep lava canals flow with celestial plasma essence.",
       kingdom: "Pyre Realms",
       color: "#FF7043",
-      glowColor: "rgba(255,112,67,0.5)"
+      glowColor: "rgba(255,112,67,0.5)",
+      bgImage: "https://images.unsplash.com/photo-1462332420958-a05d1e002413?w=900&q=70"
     },
     {
       id: "map-void",
@@ -110,7 +116,8 @@ export const MapExplorer: React.FC = () => {
       lore: "The absolute coordinates of the raw Scriptorium matrix. This sector is heavily guarded and requires the legendary master portal keys.",
       kingdom: "The Grand Void",
       color: "#AB47BC",
-      glowColor: "rgba(171,71,188,0.5)"
+      glowColor: "rgba(171,71,188,0.5)",
+      bgImage: "https://images.unsplash.com/photo-1543722530-d2c3201371e7?w=900&q=70"
     }
   ];
 
@@ -171,10 +178,10 @@ export const MapExplorer: React.FC = () => {
           <span className="font-mono text-[9px] tracking-widest uppercase bg-[#D4AF37]/20 text-[#678DC6] border border-[#D4AF37]/30 px-3 py-1 rounded-full font-bold">
             Interactive Realm Navigation
           </span>
-          <h1 className="font-medieval text-3xl md:text-5xl font-black text-[#F4F1EC] tracking-wide drop-shadow-md">
+          <h1 className="font-medieval text-3xl md:text-5xl font-black text-[#4A3428] tracking-wide drop-shadow-sm">
             Scriptorium Portal Map
           </h1>
-          <p className="text-sm font-serif italic text-[#E9DFD2]/70 max-w-xl mx-auto leading-relaxed">
+          <p className="text-sm font-serif italic text-[#4A3428]/70 max-w-xl mx-auto leading-relaxed">
             "Weave coordinate lines of unlocked dimensional kingdom boundaries and observe active placement anomalies."
           </p>
         </div>
@@ -183,7 +190,7 @@ export const MapExplorer: React.FC = () => {
         <div className="flex flex-wrap gap-2 justify-center shrink-0">
           <Button
             onClick={() => setPage("Landing")}
-            variant="parchment"
+            variant="secondary"
             size="sm"
           >
             ← Return Scriptorium
@@ -191,7 +198,7 @@ export const MapExplorer: React.FC = () => {
 
           <Button
             onClick={() => setPage("Chronicle")}
-            variant="ghost"
+            variant="accent"
             size="sm"
             className="border-2 border-[#C5A880]/30 text-gold-glow hover:brightness-110 font-medieval font-black text-xs"
           >
@@ -444,17 +451,18 @@ export const MapExplorer: React.FC = () => {
               <span className="text-[8px] font-mono tracking-widest text-[#C5A880]/70 uppercase block pb-1 border-b border-[#C5A880]/15">
                 ✦ Minimap Radar
               </span>
-              <div className="relative w-full h-20 bg-black/40 rounded overflow-hidden mt-1 flex items-center justify-center">
+              <div className="relative w-full h-20 bg-black/40 rounded overflow-hidden mt-1">
                 
-                {/* Scaled simplified landmark dots */}
+                {/* Scaled simplified landmark dots, positioned by percentage so they stay centered and proportional within the radar box regardless of its size */}
                 {landmarkNodes.map((landmark) => (
                   <div
                     key={landmark.id}
-                    className="absolute w-1.5 h-1.5 rounded-full"
+                    className="absolute w-1.5 h-1.5 rounded-full -translate-x-1/2 -translate-y-1/2"
                     style={{
-                      left: `${20 + (landmark.x / 1000) * 100}px`,
-                      top: `${10 + (landmark.y / 600) * 100}px`,
-                      backgroundColor: landmark.unlocked ? landmark.color : "#555"
+                      left: `${8 + (landmark.x / 1000) * 84}%`,
+                      top: `${10 + (landmark.y / 600) * 80}%`,
+                      backgroundColor: landmark.unlocked ? landmark.color : "#555",
+                      boxShadow: landmark.unlocked ? `0 0 4px ${landmark.color}` : "none"
                     }}
                   />
                 ))}
@@ -470,28 +478,40 @@ export const MapExplorer: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-[#1C0F0A]/95 p-5 md:p-6 rounded-3xl border-2 border-[#C5A880]/40 shadow-2xl relative overflow-hidden"
+              className="relative rounded-3xl border-2 border-[#C5A880]/40 shadow-2xl overflow-hidden min-h-[180px]"
             >
+              {/* Scenic background image themed to this landmark */}
+              <div
+                className="absolute inset-0 bg-cover bg-center scale-105 transition-all duration-700"
+                style={{ backgroundImage: `url(${selectedLandmark.bgImage})` }}
+              />
+              {/* Dark gradient scrim so text stays readable over the photo */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#150B06] via-[#150B06]/85 to-[#150B06]/40" />
+              <div
+                className="absolute inset-0 opacity-30 mix-blend-overlay"
+                style={{ background: `radial-gradient(circle at 30% 20%, ${selectedLandmark.color}, transparent 60%)` }}
+              />
+
               {/* Ribbon border color */}
               <div 
-                className="absolute top-0 left-0 right-0 h-1.5"
+                className="absolute top-0 left-0 right-0 h-1.5 z-10"
                 style={{ backgroundColor: selectedLandmark.color }}
               />
 
-              <div className="flex flex-col md:flex-row justify-between gap-4 items-start pt-1.5">
+              <div className="relative z-10 p-5 md:p-6 flex flex-col md:flex-row justify-between gap-4 items-start pt-6">
                 <div className="space-y-1 text-left">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono tracking-widest uppercase text-amber-500 px-2 py-0.5 rounded bg-black/40 border border-[#C5A880]/15">
+                    <span className="text-[10px] font-mono tracking-widest uppercase text-amber-300 px-2 py-0.5 rounded bg-black/50 border border-[#C5A880]/25">
                       {selectedLandmark.kingdom}
                     </span>
-                    <span className="text-[10px] font-mono text-stone-400">
+                    <span className="text-[10px] font-mono text-stone-300">
                       Coordinates ({selectedLandmark.x}N, {selectedLandmark.y}W)
                     </span>
                   </div>
-                  <h3 className="font-medieval text-xl font-extrabold text-[#F4F1EC]">
+                  <h3 className="font-medieval text-xl font-extrabold text-[#F4F1EC] drop-shadow-md">
                     {selectedLandmark.name}
                   </h3>
-                  <p className="text-xs text-[#E4DBC5]/80 leading-relaxed font-sans max-w-2xl pt-1">
+                  <p className="text-xs text-[#F4F1EC]/90 leading-relaxed font-sans max-w-2xl pt-1 drop-shadow-sm">
                     {selectedLandmark.lore}
                   </p>
                 </div>
@@ -500,7 +520,7 @@ export const MapExplorer: React.FC = () => {
                   {/* Close popover */}
                   <Button
                     onClick={() => setSelectedLandmark(null)}
-                    variant="parchment"
+                    variant="secondary"
                     size="sm"
                     className="w-full text-center"
                   >
