@@ -258,6 +258,7 @@ interface ActiveStoryState {
 interface GroqNodeInput {
   id: string;
   title: string;
+  description?: string;
   x: number;
   y: number;
   choices: StoryChoice[];
@@ -363,12 +364,23 @@ export const StoryProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return Number(localStorage.getItem("pp_golden_runes") || "3");
   });
 
-  const [statBoosts, setStatBoosts] = useState(() => {
+  interface StatBoosts {
+    knowledge: number;
+    courage: number;
+    creativity: number;
+    luck: number;
+  }
+
+  const defaultStatBoosts: StatBoosts = { knowledge: 0, courage: 0, creativity: 0, luck: 0 };
+
+  const [statBoosts, setStatBoosts] = useState<StatBoosts>(() => {
     const saved = localStorage.getItem("pp_stat_boosts");
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try {
+        return JSON.parse(saved) as StatBoosts;
+      } catch (e) {}
     }
-    return { knowledge: 0, courage: 0, creativity: 0, luck: 0 };
+    return defaultStatBoosts;
   });
 
   useEffect(() => {
@@ -610,42 +622,44 @@ export const StoryProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       // Patch the previous node so it has a forward edge to the new node
-      const updatedGraph = prev.graph.map((n) => {
+      const updatedGraph: StoryNode[] = prev.graph.map((n) => {
         if (n.id !== node.prevNodeId) return n;
         const alreadyLinked = n.choices.some((c) => c.nextNodeId === node.id);
         if (alreadyLinked) return n;
+
+        const continueChoice: StoryChoice = {
+          text: "Continue",
+          nextNodeId: node.id,
+          logText: `Entered ${node.title}`,
+          // NOTE: these fields are optional (`?:`) on StoryChoice, i.e. typed as
+          // `T | undefined`, not `T | null`. Use `undefined` (or omit entirely)
+          // rather than `null` so this object satisfies the StoryChoice type.
+          statReward: undefined,
+          itemReward: undefined,
+          itemRequirement: undefined,
+          statRequirement: undefined,
+        };
+
         return {
           ...n,
-          choices: [
-            ...n.choices,
-            {
-              id: `${node.prevNodeId}-to-${node.id}`,
-              text: "Continue",
-              nextNodeId: node.id,
-              logText: `Entered ${node.title}`,
-              statReward: null,
-              itemReward: null,
-              itemRequirement: null,
-              statRequirement: null,
-            },
-          ],
+          choices: [...n.choices, continueChoice],
         };
       });
 
+      const newNode: StoryNode = {
+        id: node.id,
+        title: node.title,
+        description: node.description ?? `A newly conjured scene unfolds: ${node.title}.`,
+        x: node.x,
+        y: node.y,
+        choices: node.choices,
+        isEnding: node.isEnding,
+        endingId: node.endingId,
+      };
+
       return {
         ...prev,
-        graph: [
-          ...updatedGraph,
-          {
-            id: node.id,
-            title: node.title,
-            x: node.x,
-            y: node.y,
-            choices: node.choices,
-            isEnding: node.isEnding,
-            endingId: node.endingId,
-          },
-        ],
+        graph: [...updatedGraph, newNode],
         currentNodeId: node.id,
       };
     });

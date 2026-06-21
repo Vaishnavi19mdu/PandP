@@ -168,7 +168,6 @@ export const Adventure: React.FC = () => {
       const syntheticChoices = isFinalScene
         ? []
         : scene.choices.map((c, i) => ({
-            id: `${nodeId}-choice-${i}`,
             text: c.text,
             nextNodeId: `groq-scene-${sceneNumber.current + 1}`,
             logText: c.text,
@@ -239,7 +238,6 @@ export const Adventure: React.FC = () => {
 
     const currentGroqNodeId = `groq-scene-${sceneNumber.current}`;
     chooseOption({
-      id: `groq-advance-${sceneNumber.current}`,
       text: choice.text,
       nextNodeId: currentGroqNodeId,
       logText: choice.text,
@@ -384,7 +382,6 @@ export const Adventure: React.FC = () => {
     const effect = getItemEffect(item);
 
     chooseOption({
-      id: `artifact-use-${key}-${Date.now()}`,
       text: `Use ${item}`,
       nextNodeId: activeStory.currentNodeId,
       logText: `Empowered by the ${item} — ${effect.stat} +${effect.value}.`,
@@ -405,7 +402,6 @@ export const Adventure: React.FC = () => {
     if (!collectible || !activeStory) return;
     claimedCollectiblesRef.current.add(sceneNumber.current);
     chooseOption({
-      id: `claim-collectible-${sceneNumber.current}-${Date.now()}`,
       text: `Claim ${collectible.item}`,
       nextNodeId: activeStory.currentNodeId,
       logText: `Claimed the ${collectible.item} discovered along the way.`,

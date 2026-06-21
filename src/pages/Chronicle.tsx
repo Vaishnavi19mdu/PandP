@@ -113,7 +113,7 @@ export const Chronicle: React.FC = () => {
         </div>
       </div>
 
-      <AnimatePresence mode="out-in">
+      <AnimatePresence mode="wait">
         {activeTab === "scroll" && activeStory ? (
           <motion.div
             key="scroll-tab"
@@ -366,7 +366,7 @@ export const Chronicle: React.FC = () => {
                 <div className="flex justify-end pt-2">
                   <Button
                     onClick={() => setFocusedLore(null)}
-                    variant="parchment"
+                    variant="secondary"
                     size="sm"
                   >
                     Close Codex
