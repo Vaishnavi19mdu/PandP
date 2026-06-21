@@ -1,0 +1,6 @@
+{
+  "name": "Pages & Portals",
+  "description": "An AI-inspired interactive storytelling platform where your ideas become playable worlds with stats, portals, and magical exploration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,57 @@
+/* Custom variables and theme colors for P&P */
+:root {
+  --color-marble: #F4F1EC;
+  --color-navy: #678DC6;
+  --color-lavender-blue: #AAB2FF;
+  --color-gold-glow: #E6C06A;
+  --color-soft-espresso: #4A3428;
+  --color-porcelain-blush: #F8EAE5;
+  --color-taupe-cream: #E9DFD2;
+}
+
+/* Base custom styles to give the app its enchanted library aesthetics */
+.parchment-bg {
+  background-color: var(--color-marble);
+  background-image: 
+    radial-gradient(#ffffff 1px, transparent 0),
+    radial-gradient(#ebdcd0 2px, transparent 0);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+
+.magical-glow {
+  box-shadow: 0 0 15px rgba(230, 192, 106, 0.4), 
+              0 0 30px rgba(170, 178, 255, 0.2);
+}
+
+.magical-glow-hover:hover {
+  box-shadow: 0 0 25px rgba(230, 192, 106, 0.6), 
+              0 0 45px rgba(170, 178, 255, 0.4);
+  transform: translateY(-2px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.portal-ring {
+  border: 2px dashed rgba(230, 192, 106, 0.6);
+  animation: rotatePortal 25s linear infinite;
+}
+
+.portal-ring-reverse {
+  border: 1px dashed rgba(170, 178, 255, 0.5);
+  animation: rotatePortalReverse 15s linear infinite;
+}
+
+.glass-card {
+  background: rgba(248, 234, 229, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(103, 141, 198, 0.2);
+}
+
+.book-shadow {
+  box-shadow: 0 10px 30px -5px rgba(74, 52, 40, 0.15),
+              0 4px 12px -3px rgba(74, 52, 40, 0.1);
+}
+
+.ambient-light {
+  background: radial-gradient(circle at 50% 50%, rgba(230, 192, 106, 0.15), transparent 70%);
+}

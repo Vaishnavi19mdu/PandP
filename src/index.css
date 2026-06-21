@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@import "./styles/theme.css";
+@import "./styles/animations.css";
+
+@theme {
+  --font-sans: "Inter", var(--font-fallback, sans-serif);
+  --font-medieval: "MedievalSharp", cursive, serif;
+  
+  --color-marble: #F4F1EC;
+  --color-navy: #678DC6;
+  --color-lavender-blue: #AAB2FF;
+  --color-gold-glow: #E6C06A;
+  --color-soft-espresso: #4A3428;
+  --color-porcelain-blush: #F8EAE5;
+  --color-taupe-cream: #E9DFD2;
+}
+
+body {
+  color: #4A3428;
+  background-color: #F4F1EC;
+  font-family: "Inter", sans-serif;
+}

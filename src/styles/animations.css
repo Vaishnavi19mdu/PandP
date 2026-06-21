@@ -1,0 +1,71 @@
+/* Animations for Pages & Portals */
+
+@keyframes rotatePortal {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotatePortalReverse {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes pulseGold {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(230, 192, 106, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(230, 192, 106, 0.6);
+  }
+}
+
+@keyframes pulsePortal {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes typingEffect {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+.animate-float {
+  animation: floatGentle 6s ease-in-out infinite;
+}
+
+.animate-pulse-gold {
+  animation: pulseGold 3s ease-in-out infinite;
+}
+
+.animate-pulse-portal {
+  animation: pulsePortal 4s ease-in-out infinite;
+}
+
+/* Stagger animation entries */
+.stagger-in-1 { animation-delay: 100ms; }
+.stagger-in-2 { animation-delay: 200ms; }
+.stagger-in-3 { animation-delay: 300ms; }
+.stagger-in-4 { animation-delay: 400ms; }
