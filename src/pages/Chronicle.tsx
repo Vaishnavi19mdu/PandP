@@ -75,10 +75,10 @@ export const Chronicle: React.FC = () => {
           <BookMarked className="w-3.5 h-3.5 text-[#C5A880]" />
           The Portal Chronicles
         </div>
-        <h1 className="font-medieval text-4xl md:text-5xl font-black text-[#F4F1EC] tracking-wide drop-shadow-md">
+        <h1 className="font-medieval text-4xl md:text-5xl font-black text-[#4A3428] tracking-wide">
           Scrolls & Codex
         </h1>
-        <p className="text-sm text-[#E9DFD2]/70 font-sans max-w-xl mx-auto">
+        <p className="text-sm text-[#4A3428]/70 font-sans max-w-xl mx-auto">
           Unlock cosmic history as you venture wider across dimensions. Every decision writes future archives of the Scriptorium.
         </p>
       </div>
