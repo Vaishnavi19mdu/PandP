@@ -46,7 +46,7 @@ export const StatsInventory: React.FC = () => {
           triggerGoldBurst();
           // Auto clear animation and message
           const animTimer = setTimeout(() => setBackpackAnimating(false), 1200);
-          const toastTimer = setTimeout(() => setToastMessage(null), 3500);
+          const toastTimer = setTimeout(() => setToastMessage(null), 3000);
           return () => {
             clearTimeout(animTimer);
             clearTimeout(toastTimer);
@@ -157,6 +157,15 @@ export const StatsInventory: React.FC = () => {
       icon: "✨",
       quality: "Uncharted Archetype"
     };
+  };
+
+  // Maps an affinity name to the same accent color used in the Attributes panel,
+  // so the backpack badges visually match their stat.
+  const affinityColorMap: Record<string, string> = {
+    Knowledge: "text-blue-600 bg-blue-50 border-blue-200",
+    Courage: "text-red-600 bg-red-50 border-red-200",
+    Creativity: "text-purple-600 bg-purple-50 border-purple-200",
+    Luck: "text-emerald-600 bg-emerald-50 border-emerald-200",
   };
 
   return (
@@ -286,23 +295,42 @@ export const StatsInventory: React.FC = () => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-2 relative">
-                    {inventory.map((item, idx) => (
-                      <motion.div 
-                        key={idx} 
-                        whileHover={{ scale: 1.03, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setSelectedItem(item)}
-                        className="bg-[#E9DFD2] p-2.5 rounded-xl border-2 border-gold-glow/20 shadow-sm flex flex-col justify-between group hover:border-[#D4AF37] hover:bg-white hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
-                      >
-                        <div className="absolute top-0 right-0 h-1 w-8 bg-gradient-to-r from-gold-glow to-transparent" />
-                        <span className="text-[11px] font-semibold text-[#4A3428] font-medieval leading-tight break-words pr-1">
-                          ⚜️ {item}
-                        </span>
-                        <span className="text-[7.5px] font-mono text-[#678DC6] tracking-wider uppercase mt-1.5 flex items-center gap-1 group-hover:text-gold-glow transform group-hover:translate-x-0.5 transition-all">
-                          Inspect {`✦`}
-                        </span>
-                      </motion.div>
-                    ))}
+                    {inventory.map((item, idx) => {
+                      const lore = getItemLore(item);
+                      const affinityClasses = affinityColorMap[lore.affinity] ?? "text-[#4A3428] bg-white border-gold-glow/30";
+                      return (
+                        <motion.div 
+                          key={idx} 
+                          whileHover={{ scale: 1.03, y: -2 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setSelectedItem(item)}
+                          className="bg-[#E9DFD2] p-2.5 rounded-xl border-2 border-gold-glow/20 shadow-sm flex flex-col justify-between group hover:border-[#D4AF37] hover:bg-white hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+                        >
+                          <div className="absolute top-0 right-0 h-1 w-8 bg-gradient-to-r from-gold-glow to-transparent" />
+
+                          {/* Item name + lore icon */}
+                          <div className="flex items-start justify-between gap-1.5">
+                            <span className="text-[11px] font-semibold text-[#4A3428] font-medieval leading-tight break-words pr-1">
+                              ⚜️ {item}
+                            </span>
+                            <span className="text-sm select-none shrink-0 leading-none">{lore.icon}</span>
+                          </div>
+
+                          {/* Value row: affinity stat badge + quality */}
+                          <div className="flex items-center justify-between gap-1 mt-1.5">
+                            <span className={`text-[7px] font-mono uppercase px-1.5 py-0.5 rounded border font-bold tracking-wide ${affinityClasses}`}>
+                              {lore.affinity} +1
+                            </span>
+                            <span className="text-[7.5px] font-mono text-[#678DC6] tracking-wider uppercase flex items-center gap-1 group-hover:text-gold-glow transform group-hover:translate-x-0.5 transition-all shrink-0">
+                              Inspect {`✦`}
+                            </span>
+                          </div>
+                          <span className="text-[6.5px] font-mono text-[#4A3428]/50 uppercase tracking-widest mt-1 block truncate">
+                            {lore.quality}
+                          </span>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -455,22 +483,30 @@ export const StatsInventory: React.FC = () => {
         );
       })()}
 
-      {/* 4. Magical Item Received Toast Notification Overlay */}
-      {toastMessage && (
-        <div className="fixed top-20 right-4 z-[999] bg-[#FAF0ED] text-soft-espresso border-2 border-gold-glow/50 rounded-xl p-3.5 shadow-2xl flex items-center gap-3 animate-fadeIn border-b-4 max-w-sm">
-          <div className="w-9 h-9 rounded-lg bg-[#4A3428] border border-gold-glow flex items-center justify-center text-md text-gold-glow select-none animate-pulse">
-            🎒
-          </div>
-          <div>
-            <h5 className="font-medieval text-xs font-black tracking-wide text-[#4A3428] uppercase leading-none">
-              Arcane Backpack
-            </h5>
-            <p className="font-sans text-[11px] font-semibold text-emerald-800 mt-1">
-              {toastMessage}
-            </p>
-          </div>
-        </div>
-      )}
+      {/* 4. Magical Item Received Toast Notification — centered, fades/scales away */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -16, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.94 }}
+            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[999] bg-[#FAF0ED] text-soft-espresso border-2 border-gold-glow/50 rounded-xl p-3.5 shadow-2xl flex items-center gap-3 border-b-4 max-w-sm w-[calc(100%-2rem)] sm:w-auto"
+          >
+            <div className="w-9 h-9 rounded-lg bg-[#4A3428] border border-gold-glow flex items-center justify-center text-md text-gold-glow select-none animate-pulse shrink-0">
+              🎒
+            </div>
+            <div>
+              <h5 className="font-medieval text-xs font-black tracking-wide text-[#4A3428] uppercase leading-none">
+                Arcane Backpack
+              </h5>
+              <p className="font-sans text-[11px] font-semibold text-emerald-800 mt-1">
+                {toastMessage}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

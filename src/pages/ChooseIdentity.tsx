@@ -36,6 +36,7 @@ export const ChooseIdentity: React.FC = () => {
 
   const [step, setStep] = useState<Step>("name");
   const [activeTab, setActiveTab] = useState<"All" | "Gender Neutral" | "Female" | "Male">("All");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null);
   const [selectedTitle, setSelectedTitle] = useState<AdventurerTitle>("Novice Traveler");
@@ -61,8 +62,11 @@ export const ChooseIdentity: React.FC = () => {
     else if (step === "trait") setStep("companion");
   };
 
-  const handleFinalize = () => {
-    if (!selectedPersona || !selectedCompanion || !selectedTrait) return;
+  // ── handleFinalize: now awaits the async signupUser ─────────────────────────
+  const handleFinalize = async () => {
+    if (!selectedPersona || !selectedCompanion || !selectedTrait || isSubmitting) return;
+
+    setIsSubmitting(true);
 
     let fullName = selectedPersona.name;
     let email = `${selectedPersona.name.toLowerCase().replace(/\s+/g, "")}@fantasy.com`;
@@ -81,9 +85,12 @@ export const ChooseIdentity: React.FC = () => {
       sessionStorage.removeItem("pp_pending_registration");
     }
 
-    signupUser(fullName, email, password, selectedPersona, selectedTitle, selectedCompanion, selectedTrait);
+    await signupUser(fullName, email, password, selectedPersona, selectedTitle, selectedCompanion, selectedTrait);
+
+    setIsSubmitting(false);
     setStep("success");
   };
+  // ────────────────────────────────────────────────────────────────────────────
 
   // ---------- Success Screen ----------
   if (step === "success" && selectedPersona && selectedCompanion && selectedTrait) {
@@ -448,11 +455,11 @@ export const ChooseIdentity: React.FC = () => {
           ) : (
             <button
               onClick={handleFinalize}
-              disabled={!selectedTrait}
+              disabled={!selectedTrait || isSubmitting}
               className="px-8 py-3.5 bg-gradient-to-r from-[#4E2B1F] via-[#4A3428] to-[#1F120C] text-[#E6C06A] border border-[#D4AF37]/50 rounded-xl font-medieval text-base font-black tracking-widest shadow-lg hover:brightness-125 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer uppercase flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none disabled:hover:scale-100"
             >
               <Sparkles className="w-4 h-4 text-gold-glow animate-pulse" />
-              <span>Bind This Identity</span>
+              <span>{isSubmitting ? "Binding..." : "Bind This Identity"}</span>
             </button>
           )}
         </div>

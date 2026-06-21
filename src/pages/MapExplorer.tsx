@@ -2,10 +2,22 @@ import React, { useState, useRef, useEffect } from "react";
 import { useStory } from "../context/StoryContext";
 import { 
   Compass, ZoomIn, ZoomOut, Maximize2, MapPin, Search, Sparkles, 
-  BookOpen, HelpCircle, Navigation, Info, ArrowRight, ShieldAlert
+  BookOpen, HelpCircle, Navigation, Info, ArrowRight, ShieldAlert, Loader2
 } from "lucide-react";
-import { motion, useMotionValue } from "motion/react";
+import { motion, AnimatePresence, useMotionValue } from "motion/react";
 import Button from "../components/Button";
+
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MODEL = "llama-3.3-70b-versatile";
+
+interface GeneratedLore {
+  history: string;
+  rumor: string;
+  dangerRating: "Safe" | "Moderate" | "Perilous" | "Forbidden";
+  hiddenSecret: string;
+  notableFeature: string;
+}
 
 interface LandmarkNode {
   id: string;
@@ -22,13 +34,19 @@ interface LandmarkNode {
 }
 
 export const MapExplorer: React.FC = () => {
-  const { archives, setPage, unlockedLoreIds, incrementQuestProgress } = useStory();
+  const { archives, setPage, unlockedLoreIds, incrementQuestProgress, currentUser } = useStory();
   const [zoom, setZoom] = useState<number>(1);
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [selectedLandmark, setSelectedLandmark] = useState<LandmarkNode | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const isDragging = useRef<boolean>(false);
   const dragStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Groq AI lore state
+  const [groqLore, setGroqLore] = useState<GeneratedLore | null>(null);
+  const [groqLoading, setGroqLoading] = useState(false);
+  const [groqError, setGroqError] = useState<string | null>(null);
+  const loreCache = useRef<Record<string, GeneratedLore>>({});
   
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -36,6 +54,89 @@ export const MapExplorer: React.FC = () => {
   useEffect(() => {
     incrementQuestProgress("read_lore");
   }, []);
+
+  // ── Groq AI lore generator ────────────────────────────────────────────────
+  const generateLore = async (landmark: LandmarkNode, force = false) => {
+    // Return cached result unless forcing regenerate
+    if (!force && loreCache.current[landmark.id]) {
+      setGroqLore(loreCache.current[landmark.id]);
+      return;
+    }
+
+    setGroqLoading(true);
+    setGroqError(null);
+    setGroqLore(null);
+
+    const systemPrompt = `You are Pages & Portals, a fantasy world lore scribe.
+Generate rich landmark lore in JSON only. No preamble, no markdown, no code fences.
+
+Return this exact JSON shape and nothing else:
+{
+  "history": "",
+  "rumor": "",
+  "dangerRating": "Safe" | "Moderate" | "Perilous" | "Forbidden",
+  "hiddenSecret": "",
+  "notableFeature": ""
+}
+
+Rules:
+- history: 2-3 sentences of deep lore about the location's origin and purpose.
+- rumor: A short traveler's whisper or local legend about this place (1-2 sentences, mysterious tone).
+- dangerRating: One of exactly: Safe, Moderate, Perilous, Forbidden.
+- hiddenSecret: A secret fact only seasoned explorers would know (1-2 sentences, intriguing).
+- notableFeature: The single most visually striking or unique feature of this location (short phrase, under 10 words).`;
+
+    const userMessage = `Landmark: ${landmark.name}
+Category: ${landmark.category}
+Kingdom: ${landmark.kingdom}
+Adventurer: ${currentUser?.persona?.name ?? "Traveler"} (${totalRunCompleted} completed runs)
+Base lore hint: ${landmark.lore}
+
+Generate immersive expanded lore for this location.`;
+
+    try {
+      const response = await fetch(GROQ_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          temperature: 0.9,
+          max_tokens: 500,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`Groq API error ${response.status}: ${err}`);
+      }
+
+      const data = await response.json();
+      const raw = data.choices?.[0]?.message?.content ?? "";
+      const cleaned = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
+
+      let lore: GeneratedLore;
+      try {
+        lore = JSON.parse(cleaned);
+      } catch (e) {
+        throw new Error(`Invalid JSON from Groq: ${cleaned.slice(0, 150)}`);
+      }
+
+      loreCache.current[landmark.id] = lore;
+      setGroqLore(lore);
+    } catch (err: any) {
+      setGroqError(err?.message ?? "Lore generation failed. Try again.");
+    } finally {
+      setGroqLoading(false);
+    }
+  };
+  // ─────────────────────────────────────────────────────────────────────────
 
   const totalRunCompleted = archives.length;
 
@@ -151,8 +252,8 @@ export const MapExplorer: React.FC = () => {
   const jumpToLandmark = (node: LandmarkNode) => {
     if (!node.unlocked) return;
     setSelectedLandmark(node);
+    generateLore(node);
     
-    // Calculate centering offset based on container box
     if (mapContainerRef.current) {
       const rect = mapContainerRef.current.getBoundingClientRect();
       const targetX = rect.width / 2 - node.x * zoom;
@@ -401,6 +502,7 @@ export const MapExplorer: React.FC = () => {
                         e.stopPropagation();
                         if (landmark.unlocked) {
                           setSelectedLandmark(landmark);
+                          generateLore(landmark);
                         }
                       }}
                     >
@@ -473,63 +575,163 @@ export const MapExplorer: React.FC = () => {
             </div>
           </div>
 
-          {/* Interactive Popover detail Panel */}
+          {/* AI-Powered Lore Detail Panel */}
+          <AnimatePresence mode="wait">
           {selectedLandmark && (
             <motion.div
+              key={selectedLandmark.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative rounded-3xl border-2 border-[#C5A880]/40 shadow-2xl overflow-hidden min-h-[180px]"
+              exit={{ opacity: 0, y: -6 }}
+              className="relative rounded-3xl border-2 border-[#C5A880]/40 shadow-2xl overflow-hidden"
             >
-              {/* Scenic background image themed to this landmark */}
+              {/* Scenic background */}
               <div
                 className="absolute inset-0 bg-cover bg-center scale-105 transition-all duration-700"
                 style={{ backgroundImage: `url(${selectedLandmark.bgImage})` }}
               />
-              {/* Dark gradient scrim so text stays readable over the photo */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#150B06] via-[#150B06]/85 to-[#150B06]/40" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#150B06] via-[#150B06]/90 to-[#150B06]/55" />
               <div
-                className="absolute inset-0 opacity-30 mix-blend-overlay"
+                className="absolute inset-0 opacity-25 mix-blend-overlay"
                 style={{ background: `radial-gradient(circle at 30% 20%, ${selectedLandmark.color}, transparent 60%)` }}
               />
-
-              {/* Ribbon border color */}
-              <div 
+              <div
                 className="absolute top-0 left-0 right-0 h-1.5 z-10"
                 style={{ backgroundColor: selectedLandmark.color }}
               />
 
-              <div className="relative z-10 p-5 md:p-6 flex flex-col md:flex-row justify-between gap-4 items-start pt-6">
-                <div className="space-y-1 text-left">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono tracking-widest uppercase text-amber-300 px-2 py-0.5 rounded bg-black/50 border border-[#C5A880]/25">
-                      {selectedLandmark.kingdom}
-                    </span>
-                    <span className="text-[10px] font-mono text-stone-300">
-                      Coordinates ({selectedLandmark.x}N, {selectedLandmark.y}W)
-                    </span>
+              <div className="relative z-10 p-5 md:p-6 pt-6 space-y-4">
+                {/* Header row */}
+                <div className="flex flex-col md:flex-row justify-between items-start gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-mono tracking-widest uppercase text-amber-300 px-2 py-0.5 rounded bg-black/50 border border-[#C5A880]/25">
+                        {selectedLandmark.kingdom}
+                      </span>
+                      <span className="text-[10px] font-mono text-stone-400">
+                        {selectedLandmark.category}
+                      </span>
+                      <span className="text-[10px] font-mono text-stone-500">
+                        ({selectedLandmark.x}N, {selectedLandmark.y}W)
+                      </span>
+                    </div>
+                    <h3 className="font-medieval text-xl font-extrabold text-[#F4F1EC] drop-shadow-md">
+                      {selectedLandmark.name}
+                    </h3>
                   </div>
-                  <h3 className="font-medieval text-xl font-extrabold text-[#F4F1EC] drop-shadow-md">
-                    {selectedLandmark.name}
-                  </h3>
-                  <p className="text-xs text-[#F4F1EC]/90 leading-relaxed font-sans max-w-2xl pt-1 drop-shadow-sm">
-                    {selectedLandmark.lore}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2 shrink-0 w-full md:w-auto">
-                  {/* Close popover */}
                   <Button
-                    onClick={() => setSelectedLandmark(null)}
+                    onClick={() => { setSelectedLandmark(null); setGroqLore(null); }}
                     variant="secondary"
                     size="sm"
-                    className="w-full text-center"
+                    className="shrink-0"
                   >
-                    Hide Lore Details
+                    Close Portal
                   </Button>
                 </div>
+
+                {/* AI Lore Body */}
+                {groqLoading ? (
+                  <div className="flex flex-col items-center justify-center gap-3 py-8">
+                    <Loader2 className="w-8 h-8 text-[#D4AF37] animate-spin" />
+                    <p className="font-medieval text-[#E6C06A] text-xs tracking-widest uppercase animate-pulse">
+                      Scrying the ancient records...
+                    </p>
+                  </div>
+                ) : groqError ? (
+                  <div className="space-y-3 py-4">
+                    <p className="text-red-400 text-xs font-mono">⛔ {groqError}</p>
+                    {/* Fallback to static lore */}
+                    <p className="text-xs text-[#F4F1EC]/80 font-sans leading-relaxed italic">
+                      {selectedLandmark.lore}
+                    </p>
+                    <button
+                      onClick={() => generateLore(selectedLandmark, true)}
+                      className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-[#E6C06A]/60 hover:text-[#E6C06A] transition-colors cursor-pointer"
+                    >
+                      <Sparkles className="w-3 h-3" /> Retry Scrying
+                    </button>
+                  </div>
+                ) : groqLore ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                    {/* History */}
+                    <div className="col-span-full p-4 bg-black/40 rounded-2xl border border-[#C5A880]/15 space-y-1">
+                      <span className="text-[9px] font-mono uppercase tracking-widest text-[#D4AF37] font-bold flex items-center gap-1">
+                        <BookOpen className="w-3 h-3" /> Ancient History
+                      </span>
+                      <p className="text-xs text-[#F4F1EC]/90 font-sans leading-relaxed">
+                        {groqLore.history}
+                      </p>
+                    </div>
+
+                    {/* Notable Feature + Danger Rating */}
+                    <div className="p-3.5 bg-black/30 rounded-2xl border border-[#C5A880]/10 space-y-1">
+                      <span className="text-[9px] font-mono uppercase tracking-widest text-[#678DC6] font-bold flex items-center gap-1">
+                        <Compass className="w-3 h-3" /> Notable Feature
+                      </span>
+                      <p className="text-xs text-[#F4F1EC]/85 font-serif italic leading-snug">
+                        "{groqLore.notableFeature}"
+                      </p>
+                    </div>
+
+                    <div className="p-3.5 bg-black/30 rounded-2xl border border-[#C5A880]/10 space-y-1">
+                      <span className="text-[9px] font-mono uppercase tracking-widest text-[#C5A880] font-bold flex items-center gap-1">
+                        <ShieldAlert className="w-3 h-3" /> Danger Rating
+                      </span>
+                      <span className={`text-sm font-medieval font-black ${
+                        groqLore.dangerRating === "Safe" ? "text-green-400" :
+                        groqLore.dangerRating === "Moderate" ? "text-yellow-400" :
+                        groqLore.dangerRating === "Perilous" ? "text-orange-400" :
+                        "text-red-500"
+                      }`}>
+                        {groqLore.dangerRating === "Safe" ? "🟢" : groqLore.dangerRating === "Moderate" ? "🟡" : groqLore.dangerRating === "Perilous" ? "🟠" : "🔴"} {groqLore.dangerRating}
+                      </span>
+                    </div>
+
+                    {/* Traveler's Rumor */}
+                    <div className="p-3.5 bg-black/30 rounded-2xl border border-[#C5A880]/10 space-y-1">
+                      <span className="text-[9px] font-mono uppercase tracking-widest text-amber-400 font-bold flex items-center gap-1">
+                        💬 Traveler's Rumor
+                      </span>
+                      <p className="text-xs text-[#F4F1EC]/80 font-serif italic leading-snug">
+                        "{groqLore.rumor}"
+                      </p>
+                    </div>
+
+                    {/* Hidden Secret — only shown if player has runs */}
+                    <div className={`p-3.5 rounded-2xl border space-y-1 ${
+                      totalRunCompleted >= 1
+                        ? "bg-[#2A1A0E]/60 border-[#D4AF37]/30"
+                        : "bg-black/20 border-[#C5A880]/10 opacity-50"
+                    }`}>
+                      <span className="text-[9px] font-mono uppercase tracking-widest text-[#D4AF37] font-bold flex items-center gap-1">
+                        🔮 Hidden Secret {totalRunCompleted < 1 && <span className="text-stone-500 normal-case">(complete a run to unlock)</span>}
+                      </span>
+                      {totalRunCompleted >= 1 ? (
+                        <p className="text-xs text-[#E6C06A]/90 font-serif italic leading-snug">
+                          "{groqLore.hiddenSecret}"
+                        </p>
+                      ) : (
+                        <p className="text-xs text-stone-600 font-mono">??? ??? ???</p>
+                      )}
+                    </div>
+
+                    {/* Regenerate */}
+                    <div className="col-span-full flex justify-end pt-1 border-t border-white/5">
+                      <button
+                        onClick={() => generateLore(selectedLandmark, true)}
+                        disabled={groqLoading}
+                        className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-[#E6C06A]/50 hover:text-[#E6C06A] transition-colors cursor-pointer disabled:opacity-30"
+                      >
+                        <Sparkles className="w-3 h-3" /> Re-scry This Location
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </motion.div>
           )}
+          </AnimatePresence>
 
         </div>
       </div>
